@@ -1,1 +1,11 @@
 # NS3CwndProject
+
+Using the ns3 wifi-tcp example, I modified the simulation to drop packets at specific cwnd values in order to keep the cwnd below a certain threshold that would allow the connection to still be present, but inhibit certain aspects of the network.
+
+# Modifications
+
+I first creating a modified version of the transmitter shown in some of the tutorial examples (i.e fifth.cc). This allowed me to see the fluctating cwnd in the socket as unfortunately, the pcap collected didn't show the cwnd. It is called MyApp in the mywifi-tcp file and it creates a socket and setups the transmitter based on values you give it. It also keeps track of the cwnd changing values. You use this cwnd value to then change the TTL of a packet that causes the cwnd value to reach a certain value. This is where Click modular router comes in. I also used a Click modular router in my modifcation. I installed click on the station node and would assist me in routing packets. I would use the built in element IPClassifier to route packets with the default TTL value the socket set (64) to the access point node and any packet with a differing TTL would be dropped. Using these two modification, I could (somewhat) drop packets when the cwnd value reached a certain value.
+
+# Issues
+
+Unfortunately, it doesn't 100% work as intended. For one, I do not think I set the buffer correctly as you will see in the pictures, the normal congestion algorithims don't infinitely run, but they aren't what I think you wanted. The Cubic graph doesn't look too bad but it does skip like a whole second and the NewReno graph looks really weird. MyApp doesn't start until 1 second which is why there might be a spike in the graphs. I also was not able to get the dropping mechanism fully working. While it does keep the program under the set cwnd value, it does seem to ignore like 3 seconds worth of packet sending. I am pretty sure this is because the TTL is not updating fast enough to its default value once the first packet is dropped and the cwnd is back under the desired value. This is probably causing the IPClassifier to not send 3 seconds worth of packets as they still have the undesired TTL value. I was unable to find a work around or another way to go about dropping packets unfortunately. 
